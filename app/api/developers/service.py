@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from app.database import get_db_connection
 import oracledb
 
+# 가용 개발자 검색 API 
 def search_developers_by_skill(skill_name: str):
     
     query = """
@@ -41,6 +42,33 @@ def search_developers_by_skill(skill_name: str):
                     })
 
                 return developers
+
+    except oracledb.DatabaseError as e:
+        raise HTTPException(status_code=500, detail=f"DB 쿼리 오류: {e}")
+
+
+
+# 프로젝트 인력 투입 API ( 개발자 투입여부 0->1)
+def assign_developer_by_click(employee_id: int):
+    """
+    개발자의 project_assignment_yn을 0 -> 1로 업데이트
+    """
+    update_query = """
+        UPDATE DEVELOPER
+        SET PROJECT_ASSIGNMENT_YN = 1
+        WHERE EMPLOYEE_ID = :employee_id
+          AND PROJECT_ASSIGNMENT_YN = 0
+    """
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(update_query, employee_id=employee_id)
+                if cursor.rowcount == 0:
+                    # 이미 투입되었거나 존재하지 않음
+                    raise HTTPException(status_code=404, detail="개발자가 없거나 이미 투입됨")
+                conn.commit()
+        return {"message": "개발자 투입 완료", "employee_id": employee_id}
 
     except oracledb.DatabaseError as e:
         raise HTTPException(status_code=500, detail=f"DB 쿼리 오류: {e}")

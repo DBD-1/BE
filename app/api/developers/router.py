@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from typing import List
-from .schema import DeveloperWithSkill
-from .service import search_developers_by_skill
+from .schema import DeveloperWithSkill, DeveloperAssignUpdateResponse
+from .service import search_developers_by_skill, assign_developer_by_click
 
+
+# 가용 개발자 검색 API 
 router = APIRouter(prefix="/developers", tags=["Developers"])
 
 @router.get(
@@ -12,3 +14,13 @@ router = APIRouter(prefix="/developers", tags=["Developers"])
 )
 def search_developers(skill_name: str = Query(..., description="검색할 기술명")):
     return search_developers_by_skill(skill_name)
+
+
+# 프로젝트 인력 투입 API
+@router.patch(
+    "/{employee_id}/assign",
+    response_model=DeveloperAssignUpdateResponse,
+    summary="개발자 투입 상태 변경 (0 -> 1)"
+)
+def assign_developer(employee_id: int):
+    return assign_developer_by_click(employee_id)
