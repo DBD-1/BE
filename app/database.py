@@ -2,10 +2,10 @@ import oracledb
 import os
 
 
-WALLET_DIR = r""
-DB_TNS_ALIAS = ""
-DB_USER = ""
-DB_PASSWORD = ""
+WALLET_DIR = r"C:\Users\PC\Desktop\Git\DB_1\Wallet_V42X863LJL1E28A7"
+DB_TNS_ALIAS = "v42x863ljl1e28a7_high"
+DB_USER = "team_member_kimyeeun"
+DB_PASSWORD = "Kimyeeun_password123"
 
 try:
     oracledb.init_oracle_client(
