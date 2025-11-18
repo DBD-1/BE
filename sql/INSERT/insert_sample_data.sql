@@ -62,7 +62,7 @@ FROM EMPLOYEE;
 -- 개발자 70명에게 1~3개의 무작위 기술(SKILL_ID: 1~6)을 부여
 -- *******************************************
 
--- 4. 프로젝트 (PROJECT) -> 1부터 시작
+-- 4. 프로젝트 (PROJECT) 
 -- *******************************************
 -- ID: 1, 2, 3, 4, 5 생성
 -- 프로젝트 1 (종료, 발주처 1)
@@ -96,15 +96,6 @@ ALTER SESSION DISABLE PARALLEL DML;
 
 -- 3. (목표 쿼리) 
 --    '진행 중'인 프로젝트(3번, 5번)에 투입된 개발자의 상태를 1로 갱신합니다.
-UPDATE DEVELOPER D
-SET PROJECT_ASSIGNMENT_YN = 1
-WHERE EXISTS (
-    SELECT 1 
-    FROM PROJECT_ASSIGNMENT PA
-    JOIN PROJECT P ON PA.PROJECT_ID = P.PROJECT_ID
-    WHERE PA.EMPLOYEE_ID = D.EMPLOYEE_ID
-      AND P.END_DATE IS NULL
-);
 
 
 -- *******************************************

@@ -2,10 +2,10 @@ import oracledb
 import os
 
 
-WALLET_DIR = r""
-DB_TNS_ALIAS = ""
-DB_USER = ""
-DB_PASSWORD = ""
+WALLET_DIR = r"C:\Users\te493\Wallet_V42X863LJL1E28A7"
+DB_TNS_ALIAS = "v42x863ljl1e28a7_high" 
+DB_USER = "team_member_kimtaeyeon"
+DB_PASSWORD = "Kimtaeyeon_password123"
 
 try:
     oracledb.init_oracle_client(
@@ -24,6 +24,7 @@ def init_db_pool():
         pool = oracledb.create_pool(
             user=DB_USER,
             password=DB_PASSWORD,
+            # DSN 대신 tnsnames.ora의 별칭(Service)을 사용
             dsn=DB_TNS_ALIAS, 
             min=2,
             max=5,
@@ -45,3 +46,4 @@ def close_db_pool():
     if pool:
         pool.close()
         print("DB Connection pool closed.")
+
