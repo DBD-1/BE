@@ -1,16 +1,17 @@
-import oracledb
 import os
+from dotenv import load_dotenv
+import oracledb
 
+# .env 불러오기
+load_dotenv()
 
-WALLET_DIR = r"C:\Users\te493\Wallet_V42X863LJL1E28A7"
-DB_TNS_ALIAS = "v42x863ljl1e28a7_high" 
-DB_USER = "team_member_kimtaeyeon"
-DB_PASSWORD = "Kimtaeyeon_password123"
+WALLET_DIR = os.getenv("WALLET_DIR")
+DB_TNS_ALIAS = os.getenv("DB_TNS_ALIAS")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 try:
-    oracledb.init_oracle_client(
-        config_dir=WALLET_DIR, 
-    )
+    oracledb.init_oracle_client(config_dir=WALLET_DIR)
     print("✅ Oracle Thick Mode(Wallet) initialized.")
 except Exception as e:
     print(f"❌ Error initializing Oracle Thick Mode: {e}")
