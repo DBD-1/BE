@@ -4,7 +4,9 @@ import oracledb
 
 # .env 불러오기
 load_dotenv()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 WALLET_DIR = os.getenv("WALLET_DIR")
 DB_TNS_ALIAS = os.getenv("DB_TNS_ALIAS")
 DB_USER = os.getenv("DB_USER")
