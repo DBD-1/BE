@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from app.api.developers.router import router as developer_router
 from app.api.employee.router import router as employee_router
+from app.api.skill.router import router as skill_router
 
 app = FastAPI()
 
@@ -34,3 +35,4 @@ def get_db_conn_manager():
 # 라우터 등록
 app.include_router(developer_router, prefix="/api")
 app.include_router(employee_router, prefix="/api")
+app.include_router(skill_router, prefix="/api")
