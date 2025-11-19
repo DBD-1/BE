@@ -8,6 +8,9 @@ from app.api.developers.router import router as developer_router
 from app.api.employee.router import router as employee_router
 from app.api.skill.router import router as skill_router
 
+from app.api.client.router import router as client_router
+from app.api.client_evaluation.router import router as client_evaluation_router
+
 app = FastAPI()
 
 @app.on_event("startup")
@@ -36,3 +39,6 @@ def get_db_conn_manager():
 app.include_router(developer_router, prefix="/api")
 app.include_router(employee_router, prefix="/api")
 app.include_router(skill_router, prefix="/api")
+
+app.include_router(client_router, prefix="/api")
+app.include_router(client_evaluation_router, prefix="/api")
