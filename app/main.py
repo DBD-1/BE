@@ -1,44 +1,29 @@
-from fastapi import FastAPI, Depends, HTTPException, Query
-from contextlib import contextmanager
-import oracledb
-from .database import init_db_pool, get_db_connection, close_db_pool
-from pydantic import BaseModel
-from typing import List, Optional
+from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
+from .database import init_db_pool, close_db_pool
+
 from app.api.developers.router import router as developer_router
 from app.api.employee.router import router as employee_router
 from app.api.skill.router import router as skill_router
-
 from app.api.client.router import router as client_router
 from app.api.client_evaluation.router import router as client_evaluation_router
 
-app = FastAPI()
-
-@app.on_event("startup")
-def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # [시작 시] DB 연결
+    print("🚀 Server Starting... Initializing DB Pool...")
     init_db_pool()
-
-@app.on_event("shutdown")
-def shutdown_event():
+    yield
+    # [종료 시] DB 연결 해제
+    print("🛑 Server Shutting down... Closing DB Pool...")
     close_db_pool()
 
-@contextmanager
-def get_db_conn_manager():
-    connection = None
-    try:
-        connection = get_db_connection()
-        yield connection
-    except Exception as e:
-        # DB 연결 실패 시 500 에러 발생
-        raise HTTPException(status_code=500, detail=f"DB connection error: {e}")
-    finally:
-        if connection:
-            # 사용한 연결을 다시 풀(Pool)에 반환
-            connection.close()
-            
-# 라우터 등록
+# 2. FastAPI 앱 생성 (lifespan 적용)
+app = FastAPI(lifespan=lifespan)
+
+# 3. 라우터 등록
 app.include_router(developer_router, prefix="/api")
 app.include_router(employee_router, prefix="/api")
 app.include_router(skill_router, prefix="/api")
-
 app.include_router(client_router, prefix="/api")
 app.include_router(client_evaluation_router, prefix="/api")

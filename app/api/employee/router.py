@@ -12,8 +12,8 @@ router = APIRouter(
 @router.get(
     "",
     response_model=List[Employee],
-    summary="모든 직원 목록 조회",
-    description="등록된 모든 직원의 정보를 조회합니다."
+    summary="모든 개발자 직원 목록 조회",
+    description="등록된 모든 개발자 직원의 정보를 조회합니다."
 )
 def get_all_employees():
     return get_all_employees_service()

@@ -8,6 +8,7 @@ def get_all_employees_service() -> List[Employee]:
     query = """
         SELECT EMPLOYEE_ID, EMPLOYEE_NAME, RRN, EDUCATION, YEARS, JOB_TYPE 
         FROM EMPLOYEE
+        WHERE JOB_TYPE = 'DEV'
     """
 
     employees = []
