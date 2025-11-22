@@ -8,6 +8,8 @@ from app.api.skill.router import router as skill_router
 from app.api.client.router import router as client_router
 from app.api.client_evaluation.router import router as client_evaluation_router
 
+from fastapi.middleware.cors import CORSMiddleware
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # [시작 시] DB 연결
@@ -20,6 +22,22 @@ async def lifespan(app: FastAPI):
 
 # 2. FastAPI 앱 생성 (lifespan 적용)
 app = FastAPI(lifespan=lifespan)
+
+# 2. CORS 설정 추가
+origins = [
+    # 개발 서버의 출처를 명시적으로 허용합니다.
+    "http://localhost:8080", 
+    # 프론트엔드 개발 시 자주 사용되는 다른 포트도 추가할 수 있습니다.
+    "http://127.0.0.1:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,          # 허용할 출처 목록
+    allow_credentials=True,         # 쿠키 등 자격 증명 허용 여부
+    allow_methods=["*"],            # 모든 HTTP 메서드 (GET, POST, PATCH 등) 허용
+    allow_headers=["*"],            # 모든 HTTP 헤더 허용
+)
 
 # 3. 라우터 등록
 app.include_router(developer_router, prefix="/api")
