@@ -40,7 +40,6 @@ def get_all_employees_service() -> List[Employee]:
                 rows = cursor.fetchall()
 
                 for row in rows:
-                    # row 매핑
                     employee_id = row[0]
                     employee_name = row[1]
                     job_type = row[2]
