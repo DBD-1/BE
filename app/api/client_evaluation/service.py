@@ -7,6 +7,7 @@ from app.api.client_evaluation.schema import (
     ClientEvalItem,
     ClientEvaluationSubmitRequest,
     ClientEvaluationSubmitResponse,
+    ClientRanking,
 )
 
 
@@ -152,3 +153,55 @@ def submit_client_evaluation(
 
     except oracledb.DatabaseError as e:
         raise HTTPException(status_code=500, detail=f"DB 쿼리 오류: {e}")
+
+# 4) 고객신용평가 점수 기준 고객 순위 조회
+def get_client_ranking_list() -> List[ClientRanking]:
+    """
+    MV_CLIENT_AVG_SCORE + CLIENT 를 이용해서
+    고객들의 평균 점수/등급/순위를 한 번에 조회.
+
+    - 평균점수 내림차순
+    - 동점일 경우 같은 rank (DENSE_RANK)
+    """
+    query = """
+        SELECT
+            c.CLIENT_ID,
+            c.CLIENT_NAME,
+            m.AVG_SCORE,
+            CASE
+                WHEN m.AVG_SCORE >= 90 THEN 'A'
+                WHEN m.AVG_SCORE >= 80 THEN 'B'
+                WHEN m.AVG_SCORE >= 70 THEN 'C'
+                ELSE 'D'
+            END AS GRADE,
+            DENSE_RANK() OVER (ORDER BY m.AVG_SCORE DESC, c.CLIENT_ID) AS RANK_NO
+        FROM MV_CLIENT_AVG_SCORE m
+        JOIN CLIENT c
+          ON c.CLIENT_ID = m.CLIENT_ID
+        ORDER BY RANK_NO, c.CLIENT_ID
+    """
+
+    rankings: List[ClientRanking] = []
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+
+                for row in rows:
+                    rankings.append(
+                        ClientRanking(
+                            client_id=row[0],
+                            client_name=row[1],
+                            average_score=float(row[2]),
+                            grade=row[3],
+                            rank=int(row[4]),
+                        )
+                    )
+
+    except oracledb.DatabaseError as e:
+        # MV가 없거나, 컬럼명이 다른 경우도 여기로 떨어질 수 있음
+        raise HTTPException(status_code=500, detail=f"고객 순위 조회 중 DB 오류: {e}")
+
+    return rankings

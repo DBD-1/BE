@@ -25,3 +25,10 @@ class ClientEvaluationSubmitResponse(BaseModel):
     client_id: int
     average_score: float
     grade: str
+
+class ClientRanking(BaseModel):
+    client_id: int
+    client_name: str
+    average_score: float
+    grade: str
+    rank: int  # 1등, 2등, ...
