@@ -7,10 +7,12 @@ from .schema import (
     ClientEvalItem,
     ClientEvaluationSubmitRequest,
     ClientEvaluationSubmitResponse,
+     ClientRanking,
 )
 from .service import (
     get_client_eval_items,
     submit_client_evaluation,
+    get_client_ranking_list,
 )
 
 router = APIRouter(
@@ -55,3 +57,17 @@ def create_client_evaluation(payload: ClientEvaluationSubmitRequest):
     시나리오 2 - Step 4~5
     """
     return submit_client_evaluation(payload)
+
+@router.get(
+    "/ranking",
+    response_model=List[ClientRanking],
+    summary="고객신용평가 점수 기준 고객 순위 조회",
+)
+def list_client_ranking():
+    """
+    시나리오 2 - (추가) 고객 우선순위/랭킹 페이지용 API
+
+    - MV_CLIENT_AVG_SCORE 기준으로
+      고객들의 평균 점수, 등급, 순위를 리턴
+    """
+    return get_client_ranking_list()
