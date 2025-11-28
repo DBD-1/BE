@@ -163,22 +163,46 @@ def get_client_ranking_list() -> List[ClientRanking]:
     - 평균점수 내림차순
     - 동점일 경우 같은 rank (DENSE_RANK)
     """
+    # query = """
+    #     SELECT
+    #         c.CLIENT_ID,
+    #         c.CLIENT_NAME,
+    #         m.AVG_SCORE,
+    #         CASE
+    #             WHEN m.AVG_SCORE >= 90 THEN 'A'
+    #             WHEN m.AVG_SCORE >= 80 THEN 'B'
+    #             WHEN m.AVG_SCORE >= 70 THEN 'C'
+    #             ELSE 'D'
+    #         END AS GRADE,
+    #         DENSE_RANK() OVER (ORDER BY m.AVG_SCORE DESC, c.CLIENT_ID) AS RANK_NO
+    #     FROM MV_CLIENT_AVG_SCORE m
+    #     JOIN CLIENT c
+    #       ON c.CLIENT_ID = m.CLIENT_ID
+    #     ORDER BY RANK_NO, c.CLIENT_ID
+    # """
     query = """
+    WITH overall_avg_scores AS (
+        -- 모든 고객사의 '전체 평균' 점수를 미리 계산합니다.
         SELECT
-            c.CLIENT_ID,
-            c.CLIENT_NAME,
-            m.AVG_SCORE,
-            CASE
-                WHEN m.AVG_SCORE >= 90 THEN 'A'
-                WHEN m.AVG_SCORE >= 80 THEN 'B'
-                WHEN m.AVG_SCORE >= 70 THEN 'C'
-                ELSE 'D'
-            END AS GRADE,
-            DENSE_RANK() OVER (ORDER BY m.AVG_SCORE DESC, c.CLIENT_ID) AS RANK_NO
-        FROM MV_CLIENT_AVG_SCORE m
-        JOIN CLIENT c
-          ON c.CLIENT_ID = m.CLIENT_ID
-        ORDER BY RANK_NO, c.CLIENT_ID
+            e.CLIENT_ID,
+            AVG(s.SCORE) as AVG_SCORE
+        FROM CLIENT_EVALUATION e
+        JOIN CLIENT_EVALUATION_SCORE s ON e.CLIENT_EVALUATION_ID = s.CLIENT_EVALUATION_ID
+        GROUP BY e.CLIENT_ID
+    )
+    SELECT 
+        c.CLIENT_ID, 
+        c.CLIENT_NAME, 
+        oas.AVG_SCORE,
+        CASE WHEN oas.AVG_SCORE >= 90 THEN 'A'
+             WHEN oas.AVG_SCORE >= 80 THEN 'B'
+             WHEN oas.AVG_SCORE >= 70 THEN 'C'
+             ELSE 'D'
+        END as GRADE,
+        DENSE_RANK() OVER (ORDER BY oas.AVG_SCORE DESC, c.CLIENT_ID ASC) as RANK_NO
+    FROM overall_avg_scores oas
+    JOIN CLIENT c ON oas.CLIENT_ID = c.CLIENT_ID
+    ORDER BY RANK_NO
     """
 
     rankings: List[ClientRanking] = []
